@@ -27,12 +27,13 @@
 
     /* ── Header ── */
     header {
-      padding: 52px 48px 32px;
+      padding: 40px 48px 28px;
       display: flex;
       justify-content: space-between;
       align-items: baseline;
       flex-wrap: wrap;
       gap: 20px;
+      border-bottom: 1px solid rgba(28,27,26,0.15);
     }
 
     .site-name {
@@ -79,7 +80,7 @@
 
     /* ── Gallery ── */
     #gallery {
-      padding: 4px 48px 80px;
+      padding: 28px 48px 80px;
       columns: 3 260px;
       column-gap: var(--gap);
     }
@@ -271,12 +272,12 @@
     /* ── Responsive ── */
     @media (max-width: 640px) {
       header {
-        padding: 36px 24px 20px;
+        padding: 28px 24px 18px;
         flex-direction: column;
         gap: 16px;
       }
       #gallery {
-        padding: 4px 24px 60px;
+        padding: 20px 24px 60px;
         columns: 2 140px;
       }
       #about {
