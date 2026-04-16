@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daisy De Montjoye</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400&family=Ubuntu:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0c0b;
+      --text: #f0ede8;
+      --muted: #56524e;
+      --gap: 10px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Ubuntu', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      padding: 52px 48px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .site-name {
+      font-family: 'Avenir', 'Jost', sans-serif;
+      font-size: 22px;
+      font-weight: 400;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .site-name:hover {
+      color: var(--muted);
+    }
+
+    nav {
+      display: flex;
+      gap: 28px;
+      flex-wrap: wrap;
+      align-items: baseline;
+    }
+
+    nav button {
+      background: none;
+      border: none;
+      border-bottom: 1px solid transparent;
+      cursor: pointer;
+      font-family: 'Ubuntu', sans-serif;
+      font-size: 11px;
+      font-weight: 300;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 2px 0 3px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    nav button.active,
+    nav button:hover {
+      color: var(--text);
+      border-bottom-color: var(--text);
+    }
+
+    /* ── Gallery ── */
+    #gallery {
+      padding: 4px 48px 80px;
+      columns: 3 260px;
+      column-gap: var(--gap);
+    }
+
+    .gallery-item {
+      break-inside: avoid;
+      margin-bottom: var(--gap);
+      cursor: pointer;
+      overflow: hidden;
+      position: relative;
+      background: #1c1a18;
+    }
+
+    .gallery-item img {
+      width: 100%;
+      height: auto;
+      display: block;
+      transition: transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .gallery-item:hover img {
+      transform: scale(1.035);
+    }
+
+    .item-caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 28px 14px 13px;
+      background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.52));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .gallery-item:hover .item-caption {
+      opacity: 1;
+    }
+
+    .item-title {
+      color: rgba(255,255,255,0.88);
+      font-size: 11px;
+      font-weight: 300;
+      letter-spacing: 0.06em;
+    }
+
+    .gallery-item.hidden {
+      display: none;
+    }
+
+    /* ── About ── */
+    #about {
+      display: none;
+      padding: 64px 48px 100px;
+      max-width: 560px;
+    }
+
+    #about.visible {
+      display: block;
+    }
+
+    #about p {
+      font-size: 14px;
+      line-height: 1.95;
+      color: var(--text);
+      margin-bottom: 14px;
+    }
+
+    .contact-block {
+      margin-top: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .contact-block a,
+    .contact-block span {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    .contact-block a {
+      color: var(--text);
+      border-bottom: 1px solid var(--text);
+      padding-bottom: 1px;
+      width: fit-content;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .contact-block a:hover {
+      color: var(--muted);
+      border-bottom-color: var(--muted);
+    }
+
+    /* ── Lightbox ── */
+    #lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 4, 4, 0.97);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #lightbox.open {
+      display: flex;
+    }
+
+    #lb-img {
+      max-width: min(88vw, 1300px);
+      max-height: 84vh;
+      object-fit: contain;
+      display: block;
+      user-select: none;
+    }
+
+    .lb-close {
+      position: fixed;
+      top: 26px;
+      right: 34px;
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.5);
+      font-size: 34px;
+      line-height: 1;
+      cursor: pointer;
+      transition: color 0.2s;
+      z-index: 201;
+    }
+    .lb-close:hover { color: white; }
+
+    .lb-prev,
+    .lb-next {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.35);
+      font-size: 48px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 0 28px;
+      transition: color 0.2s;
+      z-index: 201;
+    }
+    .lb-prev { left: 0; }
+    .lb-next { right: 0; }
+    .lb-prev:hover,
+    .lb-next:hover { color: rgba(255,255,255,0.85); }
+
+    #lb-caption {
+      position: fixed;
+      bottom: 26px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(255,255,255,0.38);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-align: center;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    /* ── Footer ── */
+    footer {
+      padding: 24px 48px;
+      border-top: 1px solid rgba(240,237,232,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    footer span,
+    footer a {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+
+    footer a:hover { color: var(--text); }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      header {
+        padding: 36px 24px 20px;
+        flex-direction: column;
+        gap: 16px;
+      }
+      #gallery {
+        padding: 4px 24px 60px;
+        columns: 2 140px;
+      }
+      #about {
+        padding: 44px 24px 60px;
+      }
+      footer {
+        padding: 20px 24px;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .lb-prev, .lb-next {
+        font-size: 36px;
+        padding: 0 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1><a class="site-name" href="#" id="home-link">Daisy De Montjoye</a></h1>
+  <nav>
+    <button class="filter-btn active" data-filter="all">all</button>
+    <button class="filter-btn" data-filter="painting">paintings</button>
+    <button class="filter-btn" data-filter="collage">collages</button>
+    <button class="filter-btn" data-filter="drawing">drawings &amp; prints</button>
+    <button id="about-btn">about</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ── Gallery ── -->
+  <section id="gallery">
+
+    <!-- PAINTINGS -->
+    <div class="gallery-item" data-category="painting" data-title="Eros and Psyche">
+      <img src="art/paintings/eros and psyche daisy de montjoye.png" alt="Eros and Psyche" loading="lazy">
+      <div class="item-caption"><span class="item-title">Eros and Psyche</span></div>
+    </div>
+
+    <div class="gallery-item" data-category="painting" data-title="Golden Hour">
+      <img src="art/paintings/golden hour.png" alt="Golden Hour" loading="lazy">
+      <div class="item-caption"><span class="item-title">Golden Hour</span></div>
+    </div>
+
+    <div class="gallery-item" data-category="painting" data-title="Scotland — oil on canvas, 70×60cm">
+      <img src="art/paintings/scotland, oil on canvas, 70x60cm.jpg" alt="Scotland" loading="lazy">
+      <div class="item-caption"><span class="item-title">Scotland — oil on canvas, 70×60cm</span></div>
+    </div>
+
+    <div class="gallery-item" data-category="painting" data-title="Hermaphrodite">
+      <img src="art/paintings/hermaphrodite painting by daisy de montjoye.png" alt="Hermaphrodite" loading="lazy">
+      <div class="item-caption"><span class="item-title">Hermaphrodite</span></div>
+    </div>
+
+    <div class="gallery-item" data-category="painting" data-title="Spring">
+      <img src="art/paintings/spring.png" alt="Spring" loading="lazy">
+      <div class="item-caption"><span class="item-title">Spring</span></div>
+    </div>
+
+    <div class="gallery-item" data-category="painting" data-title="A Forest in Lebanon (Johnnie) — oil on canvas, 70×50cm">
+      <img src="art/paintings/a forest in lebanon (Johnnie), oil on canvas, 70x50.jpeg" alt="A Forest in Lebanon (Johnnie)" loading="lazy">
+      <div class="item-caption"><span class="item-title">A Forest in Lebanon (Johnnie) — oil on canvas, 70×50cm</span></div>
+    </div>
+
+    <div class="gallery-item" data-category="painting" data-title="Over the Hills — oil on canvas, 70×50cm">
+      <img src="art/paintings/over the hills, oil on canvas 70x50.JPG" alt="Over the Hills" loading="lazy">
+      <div class="item-caption"><span class="item-title">Over the Hills — oil on canvas, 70×50cm</span></div>
+    </div>
+
+    <div class="gallery-item" data-category="painting" data-title="View of the River — oil, 30×20cm">
+      <img src="art/paintings/view of the river inspired by Elger Esser, 30x20cm, oil.jpg" alt="View of the River" loading="lazy">
+      <div class="item-caption"><span class="item-title">View of the River — oil, 30×20cm</span></div>
+    </div>
+
+    <div class="gallery-item" data-category="painting" data-title="Floopi Boy">
+      <img src="art/paintings/floopi boy.jpeg" alt="Floopi Boy" loading="lazy">
+      <div class="item-caption"><span class="item-title">Floopi Boy</span></div>
+    </div>
+
+    <div class="gallery-item" data-category="painting" data-title="Mural">
+      <img src="art/paintings/mural.JPG" alt="Mural" loading="lazy">
+      <div class="item-caption"><span class="item-title">Mural</span></div>
+    </div>
+
+    <div class="gallery-item" data-category="painting" data-title="Mural (ii)">
+      <img src="art/paintings/mural2.JPG" alt="Mural (ii)" loading="lazy">
+      <div class="item-caption"><span class="item-title">Mural (ii)</span></div>
+    </div>
+
+    <div class="gallery-item" data-category="painting" data-title="A Walk in the Forest">
+      <img src="art/paintings/a walk in the forest.JPG" alt="A Walk in the Forest" loading="lazy">
+      <div class="item-caption"><span class="item-title">A Walk in the Forest</span></div>
+    </div>
+
+    <div class="gallery-item" data-category="painting" data-title="">
+      <img src="art/paintings/DSC_0762.JPG" alt="" loading="lazy">
+      <div class="item-caption"></div>
+    </div>
+
+    <div class="gallery-item" data-category="painting" data-title="">
+      <img src="art/paintings/DSC_0763.JPG" alt="" loading="lazy">
+      <div class="item-caption"></div>
+    </div>
+
+    <div class="gallery-item" data-category="painting" data-title="">
+      <img src="art/paintings/310A943C-BB78-4E63-8F34-AB94EFA100B7.jpg" alt="" loading="lazy">
+      <div class="item-caption"></div>
+    </div>
+
+    <div class="gallery-item" data-category="painting" data-title="">
+      <img src="art/paintings/scotland.jpg" alt="" loading="lazy">
+      <div class="item-caption"></div>
+    </div>
+
+    <!-- COLLAGES -->
+    <div class="gallery-item" data-category="collage" data-title="Long Live the New Flesh">
+      <img src="art/collages/Long Live the New Flesh.jpg" alt="Long Live the New Flesh" loading="lazy">
+      <div class="item-caption"><span class="item-title">Long Live the New Flesh</span></div>
+    </div>
+
+    <div class="gallery-item" data-category="collage" data-title="Offguard Dad">
+      <img src="art/collages/Offguard Dad.jpg" alt="Offguard Dad" loading="lazy">
+      <div class="item-caption"><span class="item-title">Offguard Dad</span></div>
+    </div>
+
+    <div class="gallery-item" data-category="collage" data-title="Beer Whistle">
+      <img src="art/collages/beer whistle.webp" alt="Beer Whistle" loading="lazy">
+      <div class="item-caption"><span class="item-title">Beer Whistle</span></div>
+    </div>
+
+    <div class="gallery-item" data-category="collage" data-title="Keeping Up">
+      <img src="art/collages/collage keeping up - copie.png" alt="Keeping Up" loading="lazy">
+      <div class="item-caption"><span class="item-title">Keeping Up</span></div>
+    </div>
+
+    <div class="gallery-item" data-category="collage" data-title="Ville">
+      <img src="art/collages/collage ville daisy de montjoye.png" alt="Ville" loading="lazy">
+      <div class="item-caption"><span class="item-title">Ville</span></div>
+    </div>
+
+    <div class="gallery-item" data-category="collage" data-title="In the Wave">
+      <img src="art/collages/in the wave collage daisy de montjoye.webp" alt="In the Wave" loading="lazy">
+      <div class="item-caption"><span class="item-title">In the Wave</span></div>
+    </div>
+
+    <div class="gallery-item" data-category="collage" data-title="Looking at the Met">
+      <img src="art/collages/looking at the met .webp" alt="Looking at the Met" loading="lazy">
+      <div class="item-caption"><span class="item-title">Looking at the Met</span></div>
+    </div>
+
+    <!-- DRAWINGS & PRINTS -->
+    <div class="gallery-item" data-category="drawing" data-title="">
+      <img src="art/drawings and prints/1.png" alt="" loading="lazy">
+      <div class="item-caption"></div>
+    </div>
+
+    <div class="gallery-item" data-category="drawing" data-title="">
+      <img src="art/drawings and prints/3.png" alt="" loading="lazy">
+      <div class="item-caption"></div>
+    </div>
+
+    <div class="gallery-item" data-category="drawing" data-title="">
+      <img src="art/drawings and prints/5.png" alt="" loading="lazy">
+      <div class="item-caption"></div>
+    </div>
+
+    <div class="gallery-item" data-category="drawing" data-title="">
+      <img src="art/drawings and prints/7.png" alt="" loading="lazy">
+      <div class="item-caption"></div>
+    </div>
+
+    <div class="gallery-item" data-category="drawing" data-title="">
+      <img src="art/drawings and prints/9.png" alt="" loading="lazy">
+      <div class="item-caption"></div>
+    </div>
+
+    <div class="gallery-item" data-category="drawing" data-title="">
+      <img src="art/drawings and prints/11.png" alt="" loading="lazy">
+      <div class="item-caption"></div>
+    </div>
+
+    <div class="gallery-item" data-category="drawing" data-title="">
+      <img src="art/drawings and prints/13.png" alt="" loading="lazy">
+      <div class="item-caption"></div>
+    </div>
+
+    <div class="gallery-item" data-category="drawing" data-title="">
+      <img src="art/drawings and prints/17.png" alt="" loading="lazy">
+      <div class="item-caption"></div>
+    </div>
+
+    <div class="gallery-item" data-category="drawing" data-title="">
+      <img src="art/drawings and prints/22.png" alt="" loading="lazy">
+      <div class="item-caption"></div>
+    </div>
+
+    <div class="gallery-item" data-category="drawing" data-title="Golfo di Sogno">
+      <img src="art/drawings and prints/golfo di sogno.jpeg" alt="Golfo di Sogno" loading="lazy">
+      <div class="item-caption"><span class="item-title">Golfo di Sogno</span></div>
+    </div>
+
+    <div class="gallery-item" data-category="drawing" data-title="Golfo di Sogno — linoprint">
+      <img src="art/drawings and prints/golfo di sogno lino.jpeg" alt="Golfo di Sogno (linoprint)" loading="lazy">
+      <div class="item-caption"><span class="item-title">Golfo di Sogno — linoprint</span></div>
+    </div>
+
+    <div class="gallery-item" data-category="drawing" data-title="Golfo di Sogno — linoprint (i)">
+      <img src="art/drawings and prints/golfo di sogno lino 1.jpeg" alt="Golfo di Sogno (linoprint i)" loading="lazy">
+      <div class="item-caption"><span class="item-title">Golfo di Sogno — linoprint (i)</span></div>
+    </div>
+
+    <div class="gallery-item" data-category="drawing" data-title="Golfo di Sogno — linoprint (ii)">
+      <img src="art/drawings and prints/golfo di sogno linoprint.jpeg" alt="Golfo di Sogno (linoprint ii)" loading="lazy">
+      <div class="item-caption"><span class="item-title">Golfo di Sogno — linoprint (ii)</span></div>
+    </div>
+
+  </section>
+
+  <!-- ── About ── -->
+  <section id="about">
+    <!-- Replace the paragraph below with Daisy's bio text -->
+    <p>Daisy De Montjoye is a visual artist based in Marseille, France, working across painting, collage, and printmaking.</p>
+    <div class="contact-block">
+      <a href="https://www.instagram.com/damndiscodaisy/" target="_blank" rel="noopener">@damndiscodaisy</a>
+      <a href="mailto:daisy.demontjoye@gmail.com">daisy.demontjoye@gmail.com</a>
+      <span>Marseille, France</span>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span>Daisy De Montjoye</span>
+  <div style="display:flex; gap:24px;">
+    <a href="https://www.instagram.com/damndiscodaisy/" target="_blank" rel="noopener">Instagram</a>
+    <a href="mailto:daisy.demontjoye@gmail.com">daisy.demontjoye@gmail.com</a>
+  </div>
+</footer>
+
+<!-- ── Lightbox ── -->
+<div id="lightbox">
+  <button class="lb-close" aria-label="Close">×</button>
+  <button class="lb-prev" aria-label="Previous">‹</button>
+  <img id="lb-img" src="" alt="">
+  <button class="lb-next" aria-label="Next">›</button>
+  <div id="lb-caption"></div>
+</div>
+
+<script>
+  const allItems  = Array.from(document.querySelectorAll('.gallery-item'));
+  const lightbox  = document.getElementById('lightbox');
+  const lbImg     = document.getElementById('lb-img');
+  const lbCaption = document.getElementById('lb-caption');
+  const gallery   = document.getElementById('gallery');
+  const about     = document.getElementById('about');
+
+  let currentIdx = 0;
+
+  function visibleItems() {
+    return allItems.filter(el => !el.classList.contains('hidden'));
+  }
+
+  // ── Filter ──────────────────────────────────────────────────────────────
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      showGallery();
+      document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const f = btn.dataset.filter;
+      allItems.forEach(item => {
+        item.classList.toggle('hidden', f !== 'all' && item.dataset.category !== f);
+      });
+    });
+  });
+
+  // ── Home link (name) ─────────────────────────────────────────────────────
+  document.getElementById('home-link').addEventListener('click', e => {
+    e.preventDefault();
+    showGallery();
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.querySelector('[data-filter="all"]').classList.add('active');
+    allItems.forEach(item => item.classList.remove('hidden'));
+  });
+
+  // ── About toggle ─────────────────────────────────────────────────────────
+  document.getElementById('about-btn').addEventListener('click', () => {
+    gallery.style.display = 'none';
+    about.classList.add('visible');
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById('about-btn').classList.add('active');
+  });
+
+  function showGallery() {
+    gallery.style.display = '';
+    about.classList.remove('visible');
+  }
+
+  // ── Lightbox ─────────────────────────────────────────────────────────────
+  function openAt(idx) {
+    currentIdx = idx;
+    const item = visibleItems()[currentIdx];
+    lbImg.src = item.querySelector('img').src;
+    lbCaption.textContent = item.dataset.title || '';
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    lbImg.src = '';
+    document.body.style.overflow = '';
+  }
+
+  function go(dir) {
+    const vis = visibleItems();
+    currentIdx = (currentIdx + dir + vis.length) % vis.length;
+    lbImg.src = vis[currentIdx].querySelector('img').src;
+    lbCaption.textContent = vis[currentIdx].dataset.title || '';
+  }
+
+  allItems.forEach(item => {
+    item.addEventListener('click', () => {
+      const vis = visibleItems();
+      openAt(vis.indexOf(item));
+    });
+  });
+
+  document.querySelector('.lb-close').addEventListener('click', closeLightbox);
+  document.querySelector('.lb-prev').addEventListener('click', () => go(-1));
+  document.querySelector('.lb-next').addEventListener('click', () => go(1));
+
+  lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+
+  document.addEventListener('keydown', e => {
+    if (!lightbox.classList.contains('open')) return;
+    if (e.key === 'Escape')      closeLightbox();
+    if (e.key === 'ArrowLeft')   go(-1);
+    if (e.key === 'ArrowRight')  go(1);
+  });
+</script>
+
+</body>
+</html>
