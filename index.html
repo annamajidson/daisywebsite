@@ -529,7 +529,7 @@
 </div>
 
 <script>
-  const allItems  = Array.from(document.querySelectorAll('.gallery-item'));
+  let allItems    = Array.from(document.querySelectorAll('.gallery-item'));
   const lightbox  = document.getElementById('lightbox');
   const lbImg     = document.getElementById('lb-img');
   const lbCaption = document.getElementById('lb-caption');
@@ -601,12 +601,16 @@
     lbCaption.textContent = vis[currentIdx].dataset.title || '';
   }
 
-  allItems.forEach(item => {
-    item.addEventListener('click', () => {
-      const vis = visibleItems();
-      openAt(vis.indexOf(item));
+  function bindItems() {
+    allItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const vis = visibleItems();
+        openAt(vis.indexOf(item));
+      });
     });
-  });
+  }
+
+  bindItems();
 
   document.querySelector('.lb-close').addEventListener('click', closeLightbox);
   document.querySelector('.lb-prev').addEventListener('click', () => go(-1));
@@ -620,6 +624,52 @@
     if (e.key === 'ArrowLeft')   go(-1);
     if (e.key === 'ArrowRight')  go(1);
   });
+
+  // ── Sanity CMS ───────────────────────────────────────────────────────────
+  const SANITY_PROJECT = '7vp6vh5v';
+  const SANITY_DATASET = 'production';
+
+  function sanityImageUrl(asset, width) {
+    const [, id, dims, ext] = asset._ref.split('-');
+    const url = `https://cdn.sanity.io/images/${SANITY_PROJECT}/${SANITY_DATASET}/${id}-${dims}.${ext}`;
+    return `${url}?w=${width}&auto=format`;
+  }
+
+  function esc(str) {
+    return str ? str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : '';
+  }
+
+  async function loadFromSanity() {
+    try {
+      const query = encodeURIComponent('*[_type == "artPiece"] | order(order asc, _createdAt desc) {title, image, category}');
+      const res = await fetch(`https://${SANITY_PROJECT}.api.sanity.io/v2026-01-01/data/query/${SANITY_DATASET}?query=${query}`);
+      const { result } = await res.json();
+      if (!result || result.length === 0) return;
+
+      gallery.innerHTML = result.map(piece => `
+        <div class="gallery-item" data-category="${esc(piece.category)}" data-title="${esc(piece.title)}">
+          <img src="${sanityImageUrl(piece.image.asset, 800)}" alt="${esc(piece.title)}" loading="lazy">
+          <div class="item-caption"><span class="item-title">${esc(piece.title)}</span></div>
+        </div>
+      `).join('');
+
+      allItems = Array.from(document.querySelectorAll('.gallery-item'));
+
+      const activeFilter = document.querySelector('.filter-btn.active');
+      if (activeFilter) {
+        const f = activeFilter.dataset.filter;
+        allItems.forEach(item => {
+          item.classList.toggle('hidden', f !== 'all' && item.dataset.category !== f);
+        });
+      }
+
+      bindItems();
+    } catch (e) {
+      // keep static items on error
+    }
+  }
+
+  loadFromSanity();
 </script>
 
 </body>
